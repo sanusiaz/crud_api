@@ -18,6 +18,7 @@ function msg($success, $status, $message, $extra = [])
 }
 // DATA FORM REQUEST
 $data = $_POST;
+
 $returnData = [];
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") :
@@ -38,7 +39,7 @@ elseif (
 
 
     $fields = ['fields' => ['firstname', 'lastname', 'email', 'user_job']];
-    $returnData = msg(0, 422, 'Please Fill in all Required Fields! ' . $fields);
+    $returnData = msg(0, 422, 'Please Fill in all Required Fields! ', $fields);
 
 // IF THERE ARE NO EMPTY FIELDS THEN-
 else :
@@ -46,10 +47,10 @@ else :
     // connect to database
     $conn = mysqli_connect(HOSTNAME, USERNAME, PASSWORD, DATABASE_NAME, PORT);
 
-    $firstname 	= trim($data['firstname']);
-    $lastname 	= trim($data['lastname']);
-    $email 		= trim($data['email']);
-    $user_job 	= trim($data['user_job']);
+    $firstname  = trim($data['firstname']);
+    $lastname   = trim($data['lastname']);
+    $email      = trim($data['email']);
+    $user_job   = trim($data['user_job']);
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) :
         $returnData = msg(0, 422, 'Invalid Email Address!');
@@ -57,13 +58,15 @@ else :
     else :
         try {
             // check if email address has not been used
-            if ( $checkEmail = $conn->prepare("SELECT email FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
+            if ( $checkEmail = $conn->prepare("SELECT email, id FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
                 $checkEmail->bind_param("s", $email);
                 $checkEmail->execute();
                 $checkEmail->store_result();
 
 
                 if ( $checkEmail->num_rows < 1 ) {
+                    $checkEmail->bind_result($email, $id);
+                    $checkEmail->fetch();
 
                     // create new employee
                    $createEmployee = $conn->prepare("INSERT INTO employees(firstname, lastname, email, job_title) VALUES(?, ?, ?, ?)");
@@ -74,7 +77,20 @@ else :
 
 
                         if ($createEmployee->store_result() ) {
-                            $returnData = msg(200, 200, 'Employee Has Been Added');
+                            if ( $checkEmail = $conn->prepare("SELECT email, id FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
+                                $checkEmail->bind_param("s", $email);
+                                $checkEmail->execute();
+                                $checkEmail->store_result();
+                
+                
+                                if ( $checkEmail->num_rows  > 0 ) {
+                                    $checkEmail->bind_result($email, $id);
+                                    $checkEmail->fetch();
+                                    
+                                     $returnData = msg(200, 200, 'Employee Has Been Added id=' . $id);
+                                }
+                            }
+                           
                         }
 
                         $createEmployee->close();

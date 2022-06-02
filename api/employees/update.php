@@ -48,10 +48,10 @@ else :
     // connect to database
     $conn = mysqli_connect(HOSTNAME, USERNAME, PASSWORD, DATABASE_NAME, PORT);
 
-    $firstname 	= trim($data['firstname']);
-    $lastname 	= trim($data['lastname']);
-    $email 		= trim($data['email']);
-    $user_job 	= trim($data['user_job']);
+    $firstname  = trim($data['firstname']);
+    $lastname   = trim($data['lastname']);
+    $email      = trim($data['email']);
+    $user_job   = trim($data['user_job']);
     $id   = trim($data['id']);
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) :
@@ -59,14 +59,13 @@ else :
 
     else :
         try {
-            if ( $checkEmail = $conn->prepare("SELECT email FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
-                $checkEmail->bind_param("s", $email);
+            if ( $checkEmail = $conn->prepare("SELECT email, id FROM employees WHERE id = ? ORDER BY id DESC LIMIT 1") ) {
+                $checkEmail->bind_param("i", $id);
                 $checkEmail->execute();
                 $checkEmail->store_result();
 
 
                 if ( $checkEmail->num_rows > 0 ) {
-
                    $createEmployee = $conn->prepare("UPDATE employees SET firstname = ?, lastname = ?, email = ?, job_title = ? WHERE id = ?");
                     if ( $createEmployee ) {
                         $createEmployee->bind_param('ssssi', $firstname, $lastname, $email, $user_job, $id);
@@ -75,7 +74,7 @@ else :
 
 
                         if ($createEmployee->store_result() ) {
-                            $returnData = msg(200, 200, 'Employee Has Been Updated');
+                            $returnData = msg(200, 200, 'Employee Has Been Updated id=' . $id);
                         }
 
                         $createEmployee->close();
