@@ -1,11 +1,13 @@
+
 <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Create New Employee</title>
+        <title>Edit Employee</title>
         <link href='https://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="css/main.css">
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="assets/js/jquery.js"></script>
 
         <style type="text/css">
@@ -130,23 +132,29 @@ label.light {
         </style>
     </head>
     <body>
+
+
       <div class="row">
+        <br>
+        <a href="./create.html" style="padding: 13px 18px; border-radius: 7px; background-color: #216ea7; color: white; font-weight: bolder; text-decoration: none;">Insert New Record</a>
     <div class="col-md-12">
-      <form action="" method="post">
-        <h1> Create New Employee </h1>
+      <form action="index.html" method="post">
+        <h1> Update </h1>
+                        <div class="form_message" style="text-align: center; padding: 10px; padding-top: 20px; font-weight: bold; position: relative; width: 100%; text-align: center; margin: auto;"></div>
+
         
         <fieldset>
-
+          
           <legend><span class="number">1</span> Basic Info</legend>
         
           <label for="firstname">FirstName:</label>
-          <input type="text" id="firstname" name="firstname" required>
+          <input type="text" id="firstname" name="firstname">
         
           <label for="lastname">LastName:</label>
-          <input type="text" id="lastname" name="lastname" required>
+          <input type="text" id="lastname" name="lastname">
 
           <label for="email">Email:</label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" name="email">
        
   
           
@@ -155,19 +163,31 @@ label.light {
         
           <legend><span class="number">2</span> Profile</legend>
                
-         <label for="job">Job Role:</label>
+        
+          <label for="job">Job Role:</label>
           <input type="text" id="user_job" name="user_job">
+                    
          </fieldset>
-        <div class="form_message" style="text-align: center; padding: 10px; padding-top: 20px; font-weight: bold; position: relative; width: 100%; text-align: center; margin: auto;"></div>
 
-        <button type="submit">Create</button>
+         <input type="hidden" name="id" value="">
+                <div class="form_message" style="text-align: center; padding: 10px; padding-top: 20px; font-weight: bold; position: relative; width: 100%; text-align: center; margin: auto;"></div>
+
+        <button type="submit">Update</button>
         
        </form>
         </div>
       </div>
+      
 
       <script type="text/javascript">
+      $(document).ready(function () {
+      let __id = window.location.search.split('?')[1];
+      let __data = {};
 
+      if ( __id !== undefined && __id !== '' ) {
+        __data['id'] = __id.split("=")[1];
+        $("[name=id]").val(__id.split("=")[1]);
+      }
       function message_popup(status, message) {
         if ( status !== 'success') {
           $(".form_message").css('color', 'red');
@@ -177,6 +197,52 @@ label.light {
         }
         $(".form_message").text(message);
       }
+
+      // 
+
+      
+
+      $.ajax({
+        url: 'https://sanusiaz.ga/laravel_project/crud_php/api/employees/get.php',
+        type: 'GET',
+        dataType: 'JSON',
+        data: __data,
+
+
+        complete: (response) => {
+
+          if ( response.status !== 404 && response.statusText !== 'error' ) {
+            let __data = response.responseText;
+              __data = JSON.parse(__data);
+           
+              if ( __data.success === 200 ) {
+                $("[name=firstname]").val(__data.message[0].firstname);
+                $("[name=lastname]").val(__data.message[0].lastname);
+                $("[name=email]").val(__data.message[0].email);
+                $("[name=user_job]").val(__data.message[0].job_title);
+
+                message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message.message);
+
+              }
+              else {
+                message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message);
+              }
+
+          }
+          else {
+            if ( response.statusText === 'error' ) {
+              message_popup('error', 'Internal Server Error');
+            }
+            else {
+              message_popup('error', 'An Error Occurred Please Try Again Later');
+            }
+          }
+        },
+
+        error:() => message_popup('error', 'An Error Occurred')
+      });
+
+
 
       $("form").submit(function (e) {
         let __that = $(this);
@@ -192,24 +258,24 @@ label.light {
 
 
 
+
         // send ajax request to backend api
         $.ajax({
-          url: '../crud_php/api/employees/insert.php',
+          url: 'https://sanusiaz.ga/laravel_project/crud_php/api/employees/update.php',
           type: 'POST',
           dataType: 'JSON',
           data: __data,
 
 
           complete: (response) => {
+            console.log(response.responseText);
             if ( response.status !== 404 && response.statusText !== 'error' ) {
               let __data = response.responseText;
               __data = JSON.parse(__data);
 
               if ( __data.success === 200 ) {
-
-                window.location.href = './employees.php';
-
-                message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message.message);
+                message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message);
+                // window.location.href = window.location.href;
               }
               else {
                 message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message);
@@ -235,7 +301,9 @@ label.light {
 
         return false;
       });
+
+
+    });
       </script>
-      
     </body>
 </html>

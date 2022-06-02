@@ -6,10 +6,10 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // database connection
-include_once dirname(__FILE__, 3) . './config.php';
+include_once dirname(__FILE__, 3) . '/config.php';
 
 // all functions file
-include_once dirname(__FILE__, 3) . './includes/functions/all_functions.php';
+include_once dirname(__FILE__, 3) . '/includes/functions/all_functions.php';
 
 function msg($success, $status, $message, $extra = [])
 {

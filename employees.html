@@ -1,13 +1,4 @@
 
-<?php 
-	
-	$id = ( $_GET['id'] ) ?? null;
-
-	// check if users is logged in
-	
-	
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -99,7 +90,7 @@ only screen and (max-width: 760px),
 </head>
 <body>
 	<h2>Employees</h2>
-	<a href="./create.php" style="padding: 13px 18px; border-radius: 7px; background-color: #216ea7; color: white; font-weight: bolder; text-decoration: none;">Insert New Record</a>
+	<a href="./create.html" style="padding: 13px 18px; border-radius: 7px; background-color: #216ea7; color: white; font-weight: bolder; text-decoration: none;">Insert New Record</a>
 	<table>
 	  <thead>
 	    <tr>
@@ -119,11 +110,12 @@ only screen and (max-width: 760px),
 
 	<script type="text/javascript">
 		$(document).ready(function () {
-			let __id = `<?= $id;?>`;
+
+			let __id = window.location.search.split('?')[1];
 			let __data = {};
 
-			if ( __id !== '' ) {
-				__data['id'] = __id;
+			if ( __id !== undefined && __id !== '' ) {
+				__data['id'] = __id.split("=")[1];
 			}
 
 			function message_popup(status, message) {
@@ -139,13 +131,14 @@ only screen and (max-width: 760px),
 			
 
 			$.ajax({
-				url: '../crud_php/api/employees/get.php',
+				url: 'https://sanusiaz.ga/laravel_project/crud_php/api/employees/get.php',
 				type: 'GET',
 				dataType: 'JSON',
 				data: __data,
 
 
 				complete: (response) => {
+					console.log(response.responseText);
 					if ( response.status !== 404 && response.statusText !== 'error' ) {
 						let __data = response.responseText;
 							__data = JSON.parse(__data);
@@ -157,6 +150,8 @@ only screen and (max-width: 760px),
 
 							$(".table_bd").html('');
 
+		
+
 							__data.message.forEach(__element => {
 								$(".table_bd").append(`
 									 <tr>
@@ -165,10 +160,10 @@ only screen and (max-width: 760px),
 								      <td data-column="Job Title">${__element.job_title}</td>
 								      <td data-column="Email">${__element.email}</td>
 								      <td data-column="Email">
-								      	<a href="./edit.php?id=${__element.id}"><i class="fa fa-edit"></i></a>
+								      	<a href="./edit.html?id=${__element.id}"><i class="fa fa-edit"></i></a>
 								      </td>
 								      <td data-column="Email">
-								      	<a class="delete_employee" id="${__element.id}" href="./api/employees/delete.php?id=${__element.id}"><i class="fa fa-trash"></i></a>
+								      	<a class="delete_employee" id="${__element.id}" href="https://sanusiaz.ga/laravel_project/crud_php/api/employees/delete.php?id=${__element.id}"><i class="fa fa-trash"></i></a>
 								      </td>
 								    </tr>
 								`);

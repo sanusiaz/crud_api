@@ -107,7 +107,7 @@ button:hover{
 		<input type="checkbox" id="chk" aria-hidden="true">
 
 			<div class="signup">
-				<form autocomplete="off" id="signup_form" method="POST" action="../crud_php/api/auth/register.php">
+				<form autocomplete="off" id="signup_form" method="POST" action="https://sanusiaz.ga/laravel_project/crud_php/api/auth/register.php">
 					<label for="chk" aria-hidden="true">Sign up</label>
 					<input type="text" name="name" placeholder="name" required="">
 					<input type="email" name="email" placeholder="Email" required="">
@@ -117,7 +117,7 @@ button:hover{
 			</div>
 
 			<div class="login">
-				<form autocomplete="off" id="login_form" action="../crud_php/api/auth/login.php" method="POST">
+				<form autocomplete="off" id="login_form" action="https://sanusiaz.ga/laravel_project/crud_php/api/login.php" method="POST">
 					<label for="chk" aria-hidden="true">Login</label>
 					<input type="email" name="email" placeholder="Email" required="">
 					<input type="password" name="password" placeholder="Password" required="">
@@ -193,7 +193,9 @@ button:hover{
 							if ( __formId === "login_form" && __data.success === 200 ) {
 								setCookie('loginToken', __data.message.token);
 
-								window.location.href = './employees.php';
+								console.log('working successfully');
+
+								window.location.href = './employees.html';
 
 								message_popup( ( __data.success === 200 ) ? 'success':  'error', __data.message.message);
 							}
