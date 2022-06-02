@@ -28,21 +28,38 @@ elseif (isset($data['id'])) :
       // connect to database
     $conn = mysqli_connect(HOSTNAME, USERNAME, PASSWORD, DATABASE_NAME, PORT);
     if ( $data['id'] !== "" ) {
-         if( $smt = $conn->prepare("DELETE FROM employees WHERE id = ? ORDER BY id DESC LIMIT 1") ) {
-            $smt->bind_param('s', $data['id']);
-            $smt->execute();
-
-
-            if ( $smt->store_result() ) {
-                // employee has been deleted successfully
-                $returnData = msg(200, 200, 'Records Has Been Deleted Successfully');
+        // check if employee id exists
+        if ( $checkEmployeeId = $conn->prepare("SELECT id FROM employees WHERE id = ? ORDER BY id DESC LIMIT 1") ) {
+            $checkEmployeeId->bind_param("i", $data['id']);
+            $checkEmployeeId->execute();
+            $checkEmployeeId->store_result();
+            
+            if ( $checkEmployeeId->num_rows > 0 ) {
+                
+                // delete selected employee data
+                if( $smt = $conn->prepare("DELETE FROM employees WHERE id = ? ORDER BY id DESC LIMIT 1") ) {
+                    $smt->bind_param('s', $data['id']);
+                    $smt->execute();
+        
+        
+                    if ( $smt->store_result() ) {
+                        // employee has been deleted successfully
+                        $returnData = msg(200, 200, 'Records Has Been Deleted Successfully');
+                    }
+                    else {
+                        $returnData = msg(0, 422, 'An Error Occurred Please Contact Admin');
+                    }
+        
+                    $smt->close();
+                }
             }
             else {
-                $returnData = msg(0, 422, 'An Error Occurred Please Contact Admin');
+                $returnData = msg(0, 422, 'Invalid Employee ID');
             }
-
-            $smt->close();
-        } 
+            
+            // close connections
+            $checkEmployeeId->close();
+        }
     }
     else {
         $returnData = msg(0, 422, 'Id Cannot Be Empty');
