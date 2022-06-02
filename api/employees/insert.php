@@ -38,7 +38,7 @@ elseif (
 
 
     $fields = ['fields' => ['firstname', 'lastname', 'email', 'user_job']];
-    $returnData = msg(0, 422, 'Please Fill in all Required Fields! ');
+    $returnData = msg(0, 422, 'Please Fill in all Required Fields! ' . $fields);
 
 // IF THERE ARE NO EMPTY FIELDS THEN-
 else :
@@ -56,22 +56,38 @@ else :
 
     else :
         try {
+            // check if email address has not been used
+            if ( $checkEmail = $conn->prepare("SELECT email FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
+                $checkEmail->bind_param("s", $email);
+                $checkEmail->execute();
+                $checkEmail->store_result();
 
-           $createEmployee = $conn->prepare("INSERT INTO employees(firstname, lastname, email, job_title) VALUES(?, ?, ?, ?)");
-            if ( $createEmployee ) {
-                $createEmployee->bind_param('ssss', $firstname, $lastname, $email, $user_job);
-                $createEmployee->execute();
-                
+
+                if ( $checkEmail->num_rows < 1 ) {
+
+                    // create new employee
+                   $createEmployee = $conn->prepare("INSERT INTO employees(firstname, lastname, email, job_title) VALUES(?, ?, ?, ?)");
+                    if ( $createEmployee ) {
+                        $createEmployee->bind_param('ssss', $firstname, $lastname, $email, $user_job);
+                        $createEmployee->execute();
+                        
 
 
-                if ($createEmployee->store_result() ) {
-                    $returnData = msg(200, 200, 'Employee Has Been Added');
+                        if ($createEmployee->store_result() ) {
+                            $returnData = msg(200, 200, 'Employee Has Been Added');
+                        }
+
+                        $createEmployee->close();
+                    }
+                    else {
+                        $returnData = msg(0,519, 'An Error Occurred In Inserting New Users Records');
+                    }
                 }
-
-                $createEmployee->close();
-            }
-            else {
-                $returnData = msg(0,519, 'An Error Occurred In Inserting New Users Records');
+                else {
+                     $returnData = msg(0,519, 'Employee Exists');
+                }
+                // close connection
+                $checkEmail->close();
             }
         } catch (PDOException $e) {
             $returnData = msg(0, 500, $e->getMessage());

@@ -59,22 +59,34 @@ else :
 
     else :
         try {
-
-           $createEmployee = $conn->prepare("UPDATE employees SET firstname = ?, lastname = ?, email = ?, job_title = ? WHERE id = ?");
-            if ( $createEmployee ) {
-                $createEmployee->bind_param('ssssi', $firstname, $lastname, $email, $user_job, $id);
-                $createEmployee->execute();
-                
+            if ( $checkEmail = $conn->prepare("SELECT email FROM employees WHERE email = ? ORDER BY id DESC LIMIT 1") ) {
+                $checkEmail->bind_param("s", $email);
+                $checkEmail->execute();
+                $checkEmail->store_result();
 
 
-                if ($createEmployee->store_result() ) {
-                    $returnData = msg(200, 200, 'Employee Has Been Updated');
+                if ( $checkEmail->num_rows > 0 ) {
+
+                   $createEmployee = $conn->prepare("UPDATE employees SET firstname = ?, lastname = ?, email = ?, job_title = ? WHERE id = ?");
+                    if ( $createEmployee ) {
+                        $createEmployee->bind_param('ssssi', $firstname, $lastname, $email, $user_job, $id);
+                        $createEmployee->execute();
+                        
+
+
+                        if ($createEmployee->store_result() ) {
+                            $returnData = msg(200, 200, 'Employee Has Been Updated');
+                        }
+
+                        $createEmployee->close();
+                    }
+                    else {
+                        $returnData = msg(0,519, 'An Error Occurred In Updating Employee');
+                    }
                 }
-
-                $createEmployee->close();
-            }
-            else {
-                $returnData = msg(0,519, 'An Error Occurred In Updating Employee');
+                else {
+                    $returnData = msg(0,519, 'Invalid Employee Id');
+                }
             }
         } catch (PDOException $e) {
             $returnData = msg(0, 500, $e->getMessage());
